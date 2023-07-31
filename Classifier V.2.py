@@ -1,15 +1,20 @@
-import pandas as pd
 from datetime import datetime
+
 import numpy as np
+import pandas as pd
+import plotly.express as px
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
-import plotly.express as px
+import joblib
+import pickle
+
 
 pd_out = {'Product':[],'Seconds':[],'Machines':[] }
 
 # convert csv to pandas dataframe
 df = pd.read_csv('July_Data.csv', sep=',')
-
+#print(df)
 # unique product list
 upl = []
 
@@ -28,7 +33,7 @@ for index, row in df.iterrows():
 upl.append('Non Cycle')
 # convert upl to dataframe
 unique_parts_list = pd.DataFrame(upl,columns=['Product'])
-#print(unique_parts_list)
+print(unique_parts_list)
 
 # unique machine list
 uml = []
@@ -83,10 +88,15 @@ for index, row in df.iterrows():
     except:
         pass
 
+
+
 #convert tp dictionary to data frame
 testing_data = pd.DataFrame(tp)
 testing_data.sort_values(by=['Seconds'],inplace=True)
 #print(testing_data.to_string())
+
+
+
 
 # knn axis assignment
 y = np.array(testing_data['Product'])
@@ -124,17 +134,20 @@ for k in range(1,40):
 
 print((max(model_score_list)),"%")
 
+
 k = model_score_list.index(max(model_score_list)) + 1
 #print(k)
 
 # amount of nearest neighbours required
-knn = KNeighborsClassifier(n_neighbors=k,algorithm='ball_tree',weights='distance')
+knn = KNeighborsClassifier(n_neighbors=35,algorithm='ball_tree',weights='distance')
 
 # train algorithm on training data
+model_set = knn.fit(X_train,y_train)
 knn.fit(X_train,y_train)
 
 # categories new data based on trained dataset
 prediction_test = knn.predict(X_test)
+
 
 # data clean part
 x_to_df = str(X_test).split(']')
@@ -203,5 +216,15 @@ while index_2 != index_range_2:
 
 # output dataset dataframe
 prediction_data.sort_values(by=['Predicted Result'],inplace=True)
-print(prediction_data.to_string())
+#print(prediction_data.to_string())
 #prediction_data.to_csv('KNN Test data')
+
+
+model_save = "ML_KNN_Model_V.1.pkl"
+joblib.dump(knn,model_save)
+
+
+
+
+
+
